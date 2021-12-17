@@ -4,18 +4,15 @@ import time
 from datetime import datetime, date
 
 bridge_ip = 'secret/hue_ip.txt' # secret
-b = Bridge(bridge_ip) 
-b.connect()
+b = Bridge(bridge_ip) # connect to hue bridge using IP address
+b.connect()  # run first time to establish connection
 
 date = date.today()
 now = datetime.now()
 
-current_date = date.strftime("%d/%m/%y")
-current_time = now.strftime("%H:%M")
-print("Current Date =", current_date)
-print("Current Time =", current_time)
-
 def get_light_status():
+    
+    # getting state of light
     light_on = b.get_light(4, 'on')
     light_colormode = b.get_light(4, 'colormode')
     light_bri = b.get_light(4, 'bri')
@@ -33,7 +30,7 @@ def get_light_status():
     return current_date, current_time, light_on, light_colormode, light_bri, light_hue, light_sat, light_xy, light_ct
 
 
-
+# create dataframe to hold the data
 df = pd.DataFrame(columns=["date", "time", "light_on", "light_colormode", "light_bri", "light_hue", "light_sat", "light_xy", "light_ct"])
 
 
@@ -46,7 +43,7 @@ def call_hue(df):
   return df
 
 while True:
-    time.sleep(90)
+    time.sleep(90) # run every 90s
     df = call_hue(df)
   
-df.to_csv('hue_data.csv')
+df.to_csv('hue_data.csv') # convert dataframe into csv file
