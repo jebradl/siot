@@ -6,9 +6,8 @@ const char* ssid = "";
 const char* password = "";
 String apiKey = "";
 
-// Domain Name with full URL Path for HTTP POST Request
+// domain URL path for HTTP POST request
 const char* serverName = "http://api.thingspeak.com/update";
-
 
 unsigned long lastTime = 0;
 unsigned long timerDelay = 90000000;
@@ -23,32 +22,32 @@ unsigned long timerDelay = 90000000;
 #define S3 16
 #define sensorOut 17
 
-// Stores frequency read by the photodiodes
+// integer frequencies read by the photodiodes
 
 int redFrequency = 0;
 int greenFrequency = 0;
 int blueFrequency = 0;
 
 
-
 void setup() {
-  // Setting the outputs
+  // outputs of the TCS320
   pinMode(S0, OUTPUT);
   pinMode(S1, OUTPUT);
   pinMode(S2, OUTPUT);
   pinMode(S3, OUTPUT);
   
-  // Setting the sensorOut as an input
+  // sensorOut as an input
   pinMode(sensorOut, INPUT);
   
   // frequency scaling set to 20%
   digitalWrite(S0,HIGH);
   digitalWrite(S1,LOW);
   
-   // Begins serial communication 
+   // begin serial communication 
   Serial.begin(115200);
   delay(1000);
-  
+
+  // wifi connection checker
   WiFi.begin(ssid, password);
   Serial.println("Connecting");
   while(WiFi.status() != WL_CONNECTED) {
@@ -58,76 +57,60 @@ void setup() {
   Serial.println("");
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
- 
-  Serial.println("Timer set to 10 seconds (timerDelay variable), it will take 10 seconds before publishing the first reading.");
 }
 
 
 
 void loop() {
+  // reading ldr value
   int ldr_val = analogRead(Light);
   Serial.println(ldr_val);
 
-  // Setting RED (R) filtered photodiodes to be read
+  // reading red val
   digitalWrite(S2,LOW);
   digitalWrite(S3,LOW);
   
-  // Reading the output frequency
+  // output frequency
   redFrequency = pulseIn(sensorOut, LOW);
   
-   // Printing the RED (R) value
-  Serial.print("R = ");
-  Serial.print(redFrequency);
-  delay(100);
-  
-  // Setting GREEN (G) filtered photodiodes to be read
+  // reading green val
   digitalWrite(S2,HIGH);
   digitalWrite(S3,HIGH);
   
-  // Reading the output frequency
+  // output frequency
   greenFrequency = pulseIn(sensorOut, LOW);
-  
-  // Printing the GREEN (G) value  
-  Serial.print(" G = ");
-  Serial.print(greenFrequency);
-  delay(100);
  
-  // Setting BLUE (B) filtered photodiodes to be read
+  // reading blue val
   digitalWrite(S2,LOW);
   digitalWrite(S3,HIGH);
   
-  // Reading the output frequency
+  // output frequency
   blueFrequency = pulseIn(sensorOut, LOW);
-  
-  // Printing the BLUE (B) value 
-  Serial.print(" B = ");
-  Serial.println(blueFrequency);
-  delay(1000);
 
 
 
-  //Send an HTTP POST request every 10 seconds
+
+  //send an HTTP POST request every minute and a half
   if ((millis() - lastTime) > timerDelay) {
-    //Check WiFi connection status
+    // check wiFi is connected
     if(WiFi.status()== WL_CONNECTED){
       WiFiClient client;
       HTTPClient http;
     
-      // Your Domain name with URL path or IP address with path
+      // set up URL path
       http.begin(client, serverName);
       
-      // Specify content-type header
+      // content-type header
       http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-      // Data to send with HTTP POST
+      // data for HTTP POST
       String httpRequestData = "api_key=" + apiKey + "&field1=" + ldr_val + "&field2=" + redFrequency + "&field3=" + greenFrequency + "&field4=" + blueFrequency;           
-      // Send HTTP POST request
+      // HTTP POST request
       int httpResponseCode = http.POST(httpRequestData);
 
      
       Serial.print("HTTP Response codes: ");
       Serial.println(httpResponseCode);
         
-      // Free resources
       http.end();
     }
     else {
