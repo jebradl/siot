@@ -10,7 +10,7 @@ String apiKey = "";
 const char* serverName = "http://api.thingspeak.com/update";
 
 unsigned long lastTime = 0;
-unsigned long timerDelay = 90000000;
+unsigned long timerDelay = 90000;
 
 // defining inputs for LDR and TCS320
 
