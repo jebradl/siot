@@ -1,2 +1,2 @@
 # siot
-SIoT module coursework
+Sensing and the Internet of Things module coursework
